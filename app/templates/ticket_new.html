@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon %}
+{% block title %}Report a problem{% endblock %}
+{% block page_id %}student-new-ticket{% endblock %}
+{% block eyebrow %}<a href="{{ url_for('student.dashboard') }}">Student portal</a> / New ticket{% endblock %}
+{% block heading %}Report a problem{% endblock %}
+
+{% set priority_help = {
+  "low": "Minor issue, I can keep working.",
+  "medium": "Slows me down, workaround exists.",
+  "high": "I cannot continue my lab work.",
+  "critical": "Affects many computers or the whole lab."
+} %}
+
+{% block content %}
+<div class="grid-2">
+  <section class="card">
+    <div class="card-header">
+      <h2>{{ icon("i-ticket") }}Ticket details</h2>
+      <span class="subtle">Ticket ID: assigned automatically on submission</span>
+    </div>
+
+    <form class="card-body" id="ticket-form" novalidate>
+      <div class="alert alert-error" id="form-error" role="alert" hidden></div>
+      <div class="form-grid">
+        <div class="field span-2">
+          <label for="title">Short title</label>
+          <input class="input" id="title" name="title" required minlength="5" maxlength="{{ LIMITS.title }}"
+                 placeholder="e.g. No network connection on PC-14" aria-describedby="title-error">
+          <div class="field-meta"><span class="field-error" id="title-error"></span><span class="counter" data-counter-for="title"></span></div>
+        </div>
+
+        <div class="field">
+          <label for="category">Category</label>
+          <select class="select" id="category" name="category" required aria-describedby="category-error">
+            <option value="" selected disabled>Choose a category…</option>
+            {% for key, label in CATEGORIES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+          </select>
+          <span class="field-error" id="category-error"></span>
+        </div>
+
+        <div class="field">
+          <label for="workstation">Computer / workstation <span class="optional">(optional)</span></label>
+          <input class="input" id="workstation" name="workstation" maxlength="{{ LIMITS.workstation }}"
+                 pattern="[A-Za-z0-9][A-Za-z0-9 ._\-]*" placeholder="e.g. PC-14" aria-describedby="workstation-error workstation-hint">
+          <span class="hint" id="workstation-hint">Usually printed on a sticker on the monitor or CPU.</span>
+          <span class="field-error" id="workstation-error"></span>
+        </div>
+
+        <fieldset class="field span-2" style="border:0;padding:0;margin:0">
+          <legend class="field-label" style="margin-bottom:6px">Priority</legend>
+          <div class="choice-grid">
+            {% for key, label in PRIORITIES.items() %}
+              <label class="choice">
+                <input type="radio" name="priority" value="{{ key }}" {% if key == "medium" %}checked{% endif %} required>
+                <span class="choice-body">
+                  <span class="choice-title"><span class="prio-dot {{ key }}"></span>{{ label }}</span>
+                  <span class="choice-desc">{{ priority_help[key] }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+          <span class="field-error" id="priority-error"></span>
+        </fieldset>
+
+        <div class="field span-2">
+          <label for="description">Describe the problem</label>
+          <textarea class="textarea" id="description" name="description" required minlength="10"
+                    maxlength="{{ LIMITS.description }}" rows="6" aria-describedby="description-error"
+                    placeholder="What happened? What were you trying to do? Any error message on screen?"></textarea>
+          <div class="field-meta"><span class="field-error" id="description-error"></span><span class="counter" data-counter-for="description"></span></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" id="submit-ticket">{{ icon("i-send") }}Submit ticket</button>
+        <a class="btn btn-ghost" href="{{ url_for('student.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+
+    <div class="card-body" id="ticket-success" hidden>
+      <div class="state">
+        <div class="state-icon" style="background:var(--green-bg);color:var(--green)">{{ icon("i-check-circle", "icon-lg") }}</div>
+        <strong>Ticket <span class="ticket-no" id="success-number"></span> submitted</strong>
+        <span>Saved on the server at <time id="success-time" data-format="datetime"></time>.
+          The lab assistants have been notified.</span>
+        <div class="row" style="justify-content:center;margin-top:10px">
+          <a class="btn btn-primary" id="success-link" href="#">{{ icon("i-arrow-right") }}View ticket</a>
+          <button class="btn" type="button" id="report-another">{{ icon("i-plus") }}Report another problem</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="card">
+    <div class="card-header"><h2>{{ icon("i-info") }}What happens next?</h2></div>
+    <div class="card-body">
+      <ol class="timeline">
+        <li><span class="dot to-open"></span><div class="action">A unique ticket ID is created</div>
+          <div class="when">Your report is saved in the helpdesk database on the lab server.</div></li>
+        <li><span class="dot to-in_progress"></span><div class="action">Lab assistants are notified instantly</div>
+          <div class="when">The server pushes the new ticket over a WebSocket connection; nobody needs to refresh.</div></li>
+        <li><span class="dot to-resolved"></span><div class="action">Track progress live</div>
+          <div class="when">Replies and status changes (Open → In Progress → Resolved) appear as they happen.</div></li>
+      </ol>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/student.js') }}"></script>{% endblock %}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ code }} {{ title }} · Campus Lab Helpdesk</title>
+  <link rel="icon" href="{{ static_url('assets/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+</head>
+<body>
+<main class="error-page">
+  <div class="card error-card">
+    <div class="error-code">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <div class="row" style="justify-content:center">
+      <a class="btn" href="javascript:history.back()">Go back</a>
+      <a class="btn btn-primary" href="{{ url_for('auth.index') }}">{{ 'Go to my dashboard' if g.user else 'Go to login' }}</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

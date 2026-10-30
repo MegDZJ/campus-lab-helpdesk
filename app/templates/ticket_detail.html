@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, loading %}
+{% set is_assistant = g.user.is_assistant %}
+{% set list_endpoint = "assistant.manage_tickets" if is_assistant else "student.my_tickets" %}
+{% block title %}{{ ticket.ticket_number }}{% endblock %}
+{% block page_id %}ticket-detail{% endblock %}
+{% block eyebrow %}<a href="{{ url_for(list_endpoint) }}">{{ "Tickets" if is_assistant else "My tickets" }}</a> / {{ ticket.ticket_number }}{% endblock %}
+{% block heading %}Ticket {{ ticket.ticket_number }}{% endblock %}
+{% block actions %}<a class="btn btn-ghost" href="{{ url_for(list_endpoint) }}">{{ icon("i-arrow-left") }}Back to list</a>{% endblock %}
+
+{% block content %}
+<div class="grid-2" id="ticket-root" data-ticket-id="{{ ticket.id }}">
+  <div class="stack">
+    <section class="card">
+      <div class="card-body">
+        <div class="ticket-head">
+          <span class="ticket-no">{{ ticket.ticket_number }}</span>
+          <span data-ticket-field="status"><span class="badge badge-{{ ticket.status }}">{{ STATUSES[ticket.status] }}</span></span>
+          <span class="badge badge-{{ ticket.priority }}">{{ PRIORITIES[ticket.priority] }} priority</span>
+          <span class="badge badge-category">{{ CATEGORIES[ticket.category] }}</span>
+        </div>
+        <h2 class="ticket-title">{{ ticket.title }}</h2>
+        <p class="description">{{ ticket.description }}</p>
+      </div>
+    </section>
+
+    <section class="card chat">
+      <div class="card-header">
+        <h2>{{ icon("i-chat") }}Conversation</h2>
+        <span class="subtle" id="message-count"></span>
+      </div>
+      <div class="messages" id="messages" aria-live="polite" aria-label="Conversation messages">{{ loading() }}</div>
+      <form class="composer" id="composer" novalidate>
+        <label for="message-input" class="visually-hidden">Message</label>
+        <textarea class="textarea" id="message-input" rows="1" maxlength="{{ LIMITS.message }}"
+                  placeholder="{{ 'Reply to the student…' if is_assistant else 'Message the lab assistant…' }}"></textarea>
+        <button class="btn btn-primary" type="submit" id="send-button">{{ icon("i-send") }}Send</button>
+      </form>
+      <div class="composer-hint">
+        <span>Enter to send · Shift+Enter for a new line</span>
+        <span class="counter" data-counter-for="message-input"></span>
+      </div>
+    </section>
+  </div>
+
+  <aside class="stack">
+    {% if is_assistant %}
+    <section class="card">
+      <div class="card-header"><h2>{{ icon("i-hand") }}Actions</h2></div>
+      <div class="card-body actions-list" id="ticket-actions"></div>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-header"><h2>{{ icon("i-info") }}Details</h2></div>
+      <div class="card-body">
+        <dl class="details">
+          <dt>Status</dt><dd data-ticket-field="status"><span class="badge badge-{{ ticket.status }}">{{ STATUSES[ticket.status] }}</span></dd>
+          <dt>Priority</dt><dd><span class="badge badge-{{ ticket.priority }}">{{ PRIORITIES[ticket.priority] }}</span></dd>
+          <dt>Category</dt><dd>{{ CATEGORIES[ticket.category] }}</dd>
+          <dt>Workstation</dt><dd>{{ ticket.workstation or "Not specified" }}</dd>
+          <dt>Student</dt><dd>{{ ticket.student.display_name }}</dd>
+          <dt>Assigned to</dt><dd data-ticket-field="assignee">{{ ticket.assignee.display_name if ticket.assignee else "Not assigned yet" }}</dd>
+          <dt>Created</dt><dd><time datetime="{{ ticket.created_at|iso }}" data-format="datetime">{{ ticket.created_at|display_time }}</time></dd>
+          <dt>Last updated</dt><dd data-ticket-field="updated_at"><time datetime="{{ ticket.updated_at|iso }}" data-format="relative">{{ ticket.updated_at|display_time }}</time></dd>
+          <dt>Resolved</dt><dd data-ticket-field="resolved_at">{% if ticket.resolved_at %}<time datetime="{{ ticket.resolved_at|iso }}" data-format="datetime">{{ ticket.resolved_at|display_time }}</time>{% else %}—{% endif %}</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>{{ icon("i-clock") }}Timeline</h2></div>
+      <div class="card-body"><ol class="timeline" id="timeline"></ol></div>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/ticket.js') }}"></script>{% endblock %}

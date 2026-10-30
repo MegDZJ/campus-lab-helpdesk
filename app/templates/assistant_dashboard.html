@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, stat_card, loading %}
+{% block title %}Overview{% endblock %}
+{% block page_id %}assistant-dashboard{% endblock %}
+{% block eyebrow %}Lab assistant console{% endblock %}
+{% block heading %}Overview{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('assistant.manage_tickets') }}">{{ icon("i-ticket") }}Manage tickets</a>{% endblock %}
+
+{% block content %}
+<div class="stat-grid six">
+  {{ stat_card("total", "Total tickets", stats.total, "i-ticket", "navy", url_for('assistant.manage_tickets')) }}
+  {{ stat_card("open", "Open", stats.open, "i-inbox", "blue", url_for('assistant.manage_tickets', status='open')) }}
+  {{ stat_card("in_progress", "In progress", stats.in_progress, "i-activity", "amber", url_for('assistant.manage_tickets', status='in_progress')) }}
+  {{ stat_card("resolved", "Resolved", stats.resolved, "i-check-circle", "green", url_for('assistant.manage_tickets', status='resolved')) }}
+  {{ stat_card("high_priority_unresolved", "High priority, unresolved", stats.high_priority_unresolved, "i-alert", "red", url_for('assistant.manage_tickets', sort='priority')) }}
+  <a class="stat tone-purple" href="{{ url_for('assistant.network_monitor') }}">
+    <span class="stat-icon">{{ icon("i-users", "icon-lg") }}</span>
+    <span><span class="stat-value" id="online-count">{{ online_count }}</span><br><span class="stat-label">Live connections</span></span>
+  </a>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-header">
+      <h2>{{ icon("i-bell") }}Needs attention</h2>
+      <span class="subtle"><span data-stat="unassigned">{{ stats.unassigned }}</span> unassigned</span>
+    </div>
+    <div class="card-body flush" id="queue">{{ loading() }}</div>
+    <div class="card-footer"><a class="link-more" href="{{ url_for('assistant.manage_tickets', assigned='unassigned', sort='priority') }}">View all unassigned tickets {{ icon("i-arrow-right", "icon-sm") }}</a></div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2>{{ icon("i-activity") }}Recent activity</h2><span class="subtle">Live</span></div>
+    <div class="card-body flush" id="activity">{{ loading() }}</div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/assistant.js') }}"></script>{% endblock %}

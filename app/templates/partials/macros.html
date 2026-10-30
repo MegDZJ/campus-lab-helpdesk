@@ -1,0 +1,18 @@
+{% macro icon(name, extra="") -%}
+<svg class="icon {{ extra }}" aria-hidden="true"><use href="#{{ name }}"/></svg>
+{%- endmacro %}
+
+{% macro stat_card(key, label, value, icon_name, tone, href=None) -%}
+{% set tag = "a" if href else "div" %}
+<{{ tag }} class="stat tone-{{ tone }}"{% if href %} href="{{ href }}"{% endif %}>
+  <span class="stat-icon">{{ icon(icon_name, "icon-lg") }}</span>
+  <span>
+    <span class="stat-value" data-stat="{{ key }}">{{ value }}</span><br>
+    <span class="stat-label">{{ label }}</span>
+  </span>
+</{{ tag }}>
+{%- endmacro %}
+
+{% macro loading(text="Loading…") -%}
+<div class="state compact" role="status"><div class="spinner"></div><span>{{ text }}</span></div>
+{%- endmacro %}

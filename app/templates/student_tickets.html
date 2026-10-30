@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, loading %}
+{% block title %}My tickets{% endblock %}
+{% block page_id %}student-tickets{% endblock %}
+{% block eyebrow %}<a href="{{ url_for('student.dashboard') }}">Student portal</a> / Tickets{% endblock %}
+{% block heading %}My tickets{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{{ url_for('student.new_ticket') }}">{{ icon("i-plus") }}Report a problem</a>{% endblock %}
+
+{% block content %}
+<section class="card">
+  <form class="toolbar" id="ticket-filters" role="search">
+    <label class="input-icon">
+      <span class="visually-hidden">Search tickets</span>
+      {{ icon("i-search") }}
+      <input class="input" type="search" name="q" placeholder="Search by ticket ID or title" maxlength="100" autocomplete="off">
+    </label>
+    <label><span class="visually-hidden">Status</span>
+      <select class="select" name="status">
+        <option value="">All statuses</option>
+        {% for key, label in STATUSES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+  </form>
+  <div class="toolbar-meta" id="result-count" aria-live="polite"></div>
+  <div class="table-wrap" id="ticket-table">{{ loading("Loading your tickets…") }}</div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/student.js') }}"></script>{% endblock %}

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{% endblock %} · Campus Lab Helpdesk</title>
+  <link rel="icon" href="{{ static_url('assets/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+</head>
+<body data-page="{% block page_id %}{% endblock %}">
+{% include "partials/icons.html" %}
+<a class="skip-link" href="#main">Skip to content</a>
+
+{% set endpoint = request.endpoint or "" %}
+{% macro nav_link(endpoint_name, icon, label, badge_key=None, match_prefix=None) -%}
+  {%- set active = endpoint == endpoint_name or (match_prefix and endpoint.startswith(match_prefix)) -%}
+  <a href="{{ url_for(endpoint_name) }}" {% if active %}aria-current="page"{% endif %}>
+    <svg class="icon"><use href="#{{ icon }}"/></svg>{{ label }}
+    {%- if badge_key %}<span class="nav-badge" data-stat="{{ badge_key }}" title="{{ 'Open tickets' if badge_key == 'open' else 'Active tickets' }}">{{ nav_stats()[badge_key] }}</span>{% endif %}
+  </a>
+{%- endmacro %}
+
+<div class="app">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('auth.index') }}">{% include "partials/brand.html" %}</a>
+
+    {% if g.user.is_assistant %}
+      <p class="nav-label">Lab assistant</p>
+      <nav class="nav" aria-label="Main">
+        {{ nav_link("assistant.dashboard", "i-grid", "Overview") }}
+        {{ nav_link("assistant.manage_tickets", "i-ticket", "Tickets", "open", "assistant.ticket") }}
+        {{ nav_link("assistant.manage_announcements", "i-megaphone", "Announcements") }}
+        {{ nav_link("assistant.network_monitor", "i-network", "Network") }}
+      </nav>
+    {% else %}
+      <p class="nav-label">Student</p>
+      <nav class="nav" aria-label="Main">
+        {{ nav_link("student.dashboard", "i-grid", "Dashboard") }}
+        {{ nav_link("student.new_ticket", "i-plus", "Report a problem") }}
+        {{ nav_link("student.my_tickets", "i-list", "My tickets", "active", "student.ticket_detail") }}
+        {{ nav_link("student.announcements_page", "i-megaphone", "Announcements") }}
+      </nav>
+    {% endif %}
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <span class="avatar{% if g.user.is_assistant %} is-assistant{% endif %}" aria-hidden="true">{{ g.user.display_name|initials }}</span>
+        <div class="who">
+          <div class="name">{{ g.user.display_name }}</div>
+          <div class="role">{{ ROLES[g.user.role] }} · @{{ g.user.username }}</div>
+        </div>
+      </div>
+      <form class="logout-form" method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="logout-btn" type="submit"><svg class="icon"><use href="#i-logout"/></svg><span>Log out</span></button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">{% block eyebrow %}{% endblock %}</p>
+        <h1>{% block heading %}{% endblock %}</h1>
+      </div>
+      <div class="topbar-actions">
+        {% block actions %}{% endblock %}
+        <div class="conn" id="conn" data-state="connecting" title="Real-time connection to the helpdesk server">
+          <span class="conn-dot" aria-hidden="true"></span>
+          <span id="conn-label" role="status">Connecting…</span>
+          <span class="conn-meta" id="conn-meta"></span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'error' if category == 'error' else category }}"><svg class="icon"><use href="#i-info"/></svg>{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<div class="toast-region" id="toasts" aria-live="polite"></div>
+
+<script type="application/json" id="app-config">{{ client_config|tojson }}</script>
+{% if page_data is defined %}<script type="application/json" id="page-data">{{ page_data|tojson }}</script>{% endif %}
+<script src="{{ static_url('js/vendor/socket.io.min.js') }}"></script>
+<script src="{{ static_url('js/main.js') }}"></script>
+<script src="{{ static_url('js/socket.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

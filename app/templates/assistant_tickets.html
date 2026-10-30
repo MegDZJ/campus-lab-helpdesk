@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, loading %}
+{% block title %}Tickets{% endblock %}
+{% block page_id %}assistant-tickets{% endblock %}
+{% block eyebrow %}<a href="{{ url_for('assistant.dashboard') }}">Lab assistant console</a> / Tickets{% endblock %}
+{% block heading %}Ticket management{% endblock %}
+
+{% block content %}
+<section class="card">
+  <form class="toolbar" id="ticket-filters" role="search">
+    <label class="input-icon">
+      <span class="visually-hidden">Search</span>
+      {{ icon("i-search") }}
+      <input class="input" type="search" name="q" placeholder="Search ticket ID, title or student" maxlength="100" autocomplete="off">
+    </label>
+    <label><span class="visually-hidden">Status</span>
+      <select class="select" name="status">
+        <option value="">All statuses</option>
+        {% for key, label in STATUSES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label><span class="visually-hidden">Category</span>
+      <select class="select" name="category">
+        <option value="">All categories</option>
+        {% for key, label in CATEGORIES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label><span class="visually-hidden">Priority</span>
+      <select class="select" name="priority">
+        <option value="">All priorities</option>
+        {% for key, label in PRIORITIES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label><span class="visually-hidden">Assignment</span>
+      <select class="select" name="assigned">
+        <option value="">Anyone</option>
+        <option value="me">Assigned to me</option>
+        <option value="unassigned">Unassigned</option>
+        <option value="assigned">Assigned</option>
+      </select>
+    </label>
+    <label><span class="visually-hidden">Sort by</span>
+      <select class="select" name="sort">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="priority">Highest priority</option>
+        <option value="updated">Recently updated</option>
+      </select>
+    </label>
+    <button class="btn btn-ghost btn-sm" type="reset">{{ icon("i-x", "icon-sm") }}Clear</button>
+  </form>
+  <div class="toolbar-meta" id="result-count" aria-live="polite"></div>
+  <div class="table-wrap" id="ticket-table">{{ loading("Loading tickets…") }}</div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/assistant.js') }}"></script>{% endblock %}

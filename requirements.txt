@@ -1,0 +1,18 @@
+# Web framework and real-time layer
+Flask==3.1.3
+Werkzeug==3.1.9
+Flask-SocketIO==5.7.0
+python-socketio==5.17.0
+python-engineio==4.14.0
+# Enables real WebSocket transport with the threading server (otherwise only HTTP long-polling)
+simple-websocket==1.1.0
+
+# Database
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.55
+
+# Configuration from a .env file
+python-dotenv==1.2.4
+
+# Tests
+pytest==9.1.1

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, stat_card, loading %}
+{% block title %}Dashboard{% endblock %}
+{% block page_id %}student-dashboard{% endblock %}
+{% block eyebrow %}Student portal{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="welcome">
+  <div>
+    <h2>Welcome back, {{ g.user.display_name.split()[0] }}</h2>
+    <p>Having trouble with a lab computer? Report it here. A lab assistant is notified
+      immediately, and every reply and status change appears on this page as it happens.</p>
+  </div>
+  <a class="btn btn-light" href="{{ url_for('student.new_ticket') }}">{{ icon("i-plus") }}Report a problem</a>
+</section>
+
+<div class="stat-grid">
+  {{ stat_card("total", "Total tickets", stats.total, "i-ticket", "navy", url_for('student.my_tickets')) }}
+  {{ stat_card("open", "Open", stats.open, "i-inbox", "blue", url_for('student.my_tickets', status='open')) }}
+  {{ stat_card("in_progress", "In progress", stats.in_progress, "i-activity", "amber", url_for('student.my_tickets', status='in_progress')) }}
+  {{ stat_card("resolved", "Resolved", stats.resolved, "i-check-circle", "green", url_for('student.my_tickets', status='resolved')) }}
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-header">
+      <h2>{{ icon("i-list") }}Recent tickets</h2>
+      <a class="link-more" href="{{ url_for('student.my_tickets') }}">View all {{ icon("i-arrow-right", "icon-sm") }}</a>
+    </div>
+    <div class="card-body flush" id="recent-tickets">{{ loading() }}</div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>{{ icon("i-megaphone") }}Latest announcements</h2>
+      <a class="link-more" href="{{ url_for('student.announcements_page') }}">View all {{ icon("i-arrow-right", "icon-sm") }}</a>
+    </div>
+    <div id="latest-announcements">{{ loading() }}</div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/student.js') }}"></script>{% endblock %}

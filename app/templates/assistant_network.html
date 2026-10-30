@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, loading %}
+{% block title %}Network{% endblock %}
+{% block page_id %}assistant-network{% endblock %}
+{% block eyebrow %}<a href="{{ url_for('assistant.dashboard') }}">Lab assistant console</a> / Network{% endblock %}
+{% block heading %}Network monitor{% endblock %}
+{% block actions %}<button class="btn" type="button" id="refresh-network">{{ icon("i-refresh") }}Refresh</button>{% endblock %}
+
+{% block content %}
+<div class="grid-2 even">
+  <section class="card">
+    <div class="card-header"><h2>{{ icon("i-server") }}Server</h2><span class="subtle">Running on {{ info.hostname }}</span></div>
+    <div class="card-body">
+      <dl class="kv">
+        <dt>Bind address</dt><dd><code>{{ info.bind_host }}:{{ info.port }}</code>
+          {% if info.bind_host == "0.0.0.0" %}<span class="subtle">(all interfaces)</span>{% endif %}</dd>
+        <dt>Open on server</dt><dd><code>{{ info.local_url }}</code></dd>
+        <dt>Open from LAN</dt>
+        <dd>
+          <div class="url-list" id="lan-urls">
+            {% for url in info.lan_urls %}<span class="url-chip">{{ icon("i-wifi", "icon-sm") }}{{ url }}</span>
+            {% else %}<span class="muted">No LAN address detected. Run <code>hostname -I</code> on the server.</span>{% endfor %}
+          </div>
+        </dd>
+        <dt>Heartbeat</dt><dd>ping every {{ info.ping_interval }} s, timeout {{ info.ping_timeout }} s</dd>
+        <dt>Server mode</dt><dd>Flask-SocketIO {{ info.flask_socketio_version }} · {{ info.async_mode }}</dd>
+        <dt>Database</dt><dd>{{ info.database }}</dd>
+        <dt>Started</dt><dd><time datetime="{{ info.started_at }}" data-format="relative"></time></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2>{{ icon("i-network") }}Protocol stack used by this app</h2></div>
+    <div class="card-body">
+      <ul class="layers">
+        <li><strong>Application</strong><span>HTTP pages &amp; JSON API · Socket.IO events (ticket:created, ticket:message, …)</span></li>
+        <li><strong>Session</strong><span>WebSocket (upgraded from HTTP) or HTTP long-polling fallback</span></li>
+        <li><strong>Transport</strong><span>TCP: reliable, ordered byte stream on port {{ info.port }}</span></li>
+        <li><strong>Network</strong><span>IPv4 private LAN addresses (e.g. 192.168.x.x / 10.x.x.x)</span></li>
+        <li><strong>Link</strong><span>Ethernet / Wi-Fi inside the lab, no internet needed</span></li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<section class="card section-gap">
+  <div class="card-header">
+    <h2>{{ icon("i-users") }}Live Socket.IO connections</h2>
+    <span class="subtle"><span id="client-count">{{ page_data.clients|length }}</span> connected · updates automatically</span>
+  </div>
+  <div class="table-wrap" id="client-table">{{ loading() }}</div>
+  <div class="card-footer subtle">One row per open browser tab. A client that stops answering the heartbeat is removed after about {{ info.ping_interval + info.ping_timeout }} seconds.</div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/assistant.js') }}"></script>{% endblock %}

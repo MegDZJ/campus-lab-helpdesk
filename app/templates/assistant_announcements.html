@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, loading %}
+{% block title %}Announcements{% endblock %}
+{% block page_id %}assistant-announcements{% endblock %}
+{% block eyebrow %}<a href="{{ url_for('assistant.dashboard') }}">Lab assistant console</a> / Announcements{% endblock %}
+{% block heading %}Announcements{% endblock %}
+
+{% macro announcement_fields(prefix) %}
+  <div class="field">
+    <label for="{{ prefix }}-title">Title</label>
+    <input class="input" id="{{ prefix }}-title" name="title" required minlength="3" maxlength="{{ LIMITS.announcement_title }}"
+           placeholder="e.g. Lab 2 closed for maintenance" aria-describedby="{{ prefix }}-title-error">
+    <div class="field-meta"><span class="field-error" id="{{ prefix }}-title-error" data-error-for="title"></span><span class="counter" data-counter-for="{{ prefix }}-title"></span></div>
+  </div>
+  <div class="field">
+    <label for="{{ prefix }}-content">Message</label>
+    <textarea class="textarea" id="{{ prefix }}-content" name="content" required minlength="5" rows="5"
+              maxlength="{{ LIMITS.announcement_content }}" aria-describedby="{{ prefix }}-content-error"
+              placeholder="Details students should know…"></textarea>
+    <div class="field-meta"><span class="field-error" id="{{ prefix }}-content-error" data-error-for="content"></span><span class="counter" data-counter-for="{{ prefix }}-content"></span></div>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div class="grid-2 form-left">
+  <section class="card">
+    <div class="card-header"><h2>{{ icon("i-megaphone") }}New announcement</h2></div>
+    <form class="card-body stack" id="announcement-form" novalidate style="gap:16px">
+      <div class="alert alert-error" data-form-error role="alert" hidden></div>
+      {{ announcement_fields("new") }}
+      <div class="row">
+        <button class="btn btn-primary" type="submit">{{ icon("i-send") }}Publish to all connected users</button>
+      </div>
+      <p class="hint">Published announcements are saved, then broadcast instantly to every connected browser in the lab.</p>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2>{{ icon("i-list") }}Published</h2>
+      <span class="subtle" id="announcement-count"></span>
+    </div>
+    <div id="announcement-list">{{ loading() }}</div>
+  </section>
+</div>
+
+<dialog class="modal" id="edit-dialog" aria-labelledby="edit-dialog-title">
+  <form id="edit-form" novalidate>
+    <div class="modal-header">
+      <h2 id="edit-dialog-title">Edit announcement</h2>
+      <button class="btn btn-ghost btn-sm" type="button" data-close aria-label="Close">{{ icon("i-x") }}</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" data-form-error role="alert" hidden></div>
+      {{ announcement_fields("edit") }}
+    </div>
+    <div class="modal-footer">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn btn-primary" type="submit">{{ icon("i-check") }}Save changes</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="delete-dialog" aria-labelledby="delete-dialog-title">
+  <div class="modal-header">
+    <h2 id="delete-dialog-title">Delete announcement?</h2>
+    <button class="btn btn-ghost btn-sm" type="button" data-close aria-label="Close">{{ icon("i-x") }}</button>
+  </div>
+  <div class="modal-body">
+    <p>“<strong id="delete-title"></strong>” will be removed for everyone. This cannot be undone.</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" type="button" data-close>Cancel</button>
+    <button class="btn btn-danger-solid" type="button" id="confirm-delete">{{ icon("i-trash") }}Delete</button>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static_url('js/assistant.js') }}"></script>{% endblock %}

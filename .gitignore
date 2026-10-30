@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment (create it on each computer; do not copy it between machines)
+.venv/
+venv/
+
+# Local configuration and secrets
+.env
+instance/*
+!instance/.gitkeep
+docs/
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

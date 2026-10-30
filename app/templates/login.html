@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in · Campus Lab Helpdesk</title>
+  <link rel="icon" href="{{ static_url('assets/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+</head>
+<body>
+{% include "partials/icons.html" %}
+<div class="auth-page">
+  <section class="auth-aside">
+    <div class="brand">{% include "partials/brand.html" %}</div>
+    <div>
+      <h1>Get help with lab computers without leaving your seat.</h1>
+      <p class="lead">Report a problem, chat with the lab assistant and follow your ticket live,
+        all over the college LAN. No internet connection needed.</p>
+      <ul class="feature-list">
+        <li><span class="f-icon"><svg class="icon"><use href="#i-ticket"/></svg></span>
+          <div><strong>Report issues in seconds</strong><span>Every report gets a unique ticket ID you can track.</span></div></li>
+        <li><span class="f-icon"><svg class="icon"><use href="#i-activity"/></svg></span>
+          <div><strong>Real-time updates</strong><span>Status changes and replies arrive instantly over WebSockets.</span></div></li>
+        <li><span class="f-icon"><svg class="icon"><use href="#i-wifi"/></svg></span>
+          <div><strong>Works offline</strong><span>Runs entirely on the local network, with no cloud services.</span></div></li>
+      </ul>
+    </div>
+    <p class="auth-foot">Computer Networks project · Flask · Socket.IO · SQLite</p>
+  </section>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <h2>Log in</h2>
+      <p class="muted">Use the account given to you by the lab.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="margin-bottom:16px"><svg class="icon"><use href="#i-check-circle"/></svg>{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% if error %}
+        <div class="alert alert-error" role="alert" style="margin-bottom:16px"><svg class="icon"><use href="#i-alert"/></svg>{{ error }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+          <label for="username">Username</label>
+          <input class="input" id="username" name="username" value="{{ username }}" required
+                 autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="40" autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" required
+                 autocomplete="current-password" maxlength="128">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit"><svg class="icon"><use href="#i-lock"/></svg>Log in</button>
+      </form>
+
+      {% if config.SHOW_DEMO_CREDENTIALS %}
+        <div class="demo-box">
+          <strong>Demonstration accounts</strong>
+          <table>
+            <tr><td>Students</td><td><code>asha</code> <code>rahul</code> <code>sneha</code></td><td><code>student123</code></td></tr>
+            <tr><td>Assistants</td><td><code>ravi</code> <code>meera</code></td><td><code>assistant123</code></td></tr>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+</body>
+</html>
